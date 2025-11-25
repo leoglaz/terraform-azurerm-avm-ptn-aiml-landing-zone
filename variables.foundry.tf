@@ -3,6 +3,8 @@
 variable "ai_foundry_definition" {
   type = object({
     # AI Foundry Hub Configuration
+    deploy           = optional(bool, true)
+    location         = optional(string, null)  # Override location for AI Foundry (default: use main location)
     create_byor      = optional(bool, true)
     purge_on_destroy = optional(bool, false)
     ai_foundry = optional(object({

@@ -1,10 +1,11 @@
 module "foundry_ptn" {
+  count   = var.ai_foundry_definition.deploy ? 1 : 0
   source  = "Azure/avm-ptn-aiml-ai-foundry/azurerm"
   version = "0.6.0"
 
   #configure the base resource
   base_name                  = coalesce(var.name_prefix, "foundry")
-  location                   = azurerm_resource_group.this.location
+  location                   = coalesce(var.ai_foundry_definition.location, azurerm_resource_group.this.location)
   resource_group_resource_id = azurerm_resource_group.this.id
   #pass through the resource definitions
   ai_foundry                          = local.foundry_ai_foundry
@@ -13,7 +14,7 @@ module "foundry_ptn" {
   ai_search_definition                = local.foundry_ai_search_definition
   cosmosdb_definition                 = local.foundry_cosmosdb_definition
   create_byor                         = var.ai_foundry_definition.create_byor
-  create_private_endpoints            = true
+  create_private_endpoints            = var.ai_foundry_definition.location == null ? true : false  # Disable for cross-region; create manually
   enable_telemetry                    = var.enable_telemetry
   key_vault_definition                = local.foundry_key_vault_definition
   law_definition                      = var.ai_foundry_definition.law_definition
@@ -24,7 +25,7 @@ module "foundry_ptn" {
 }
 
 resource "azapi_resource_action" "purge_ai_foundry" {
-  count = var.ai_foundry_definition.purge_on_destroy ? 1 : 0
+  count = (var.ai_foundry_definition.deploy && var.ai_foundry_definition.purge_on_destroy) ? 1 : 0
 
   method      = "DELETE"
   resource_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.CognitiveServices/locations/${azurerm_resource_group.this.location}/resourceGroups/${azurerm_resource_group.this.name}/deletedAccounts/${local.ai_foundry_name}"
@@ -35,7 +36,7 @@ resource "azapi_resource_action" "purge_ai_foundry" {
 }
 
 resource "time_sleep" "purge_ai_foundry_cooldown" {
-  count = var.ai_foundry_definition.purge_on_destroy ? 1 : 0
+  count = (var.ai_foundry_definition.deploy && var.ai_foundry_definition.purge_on_destroy) ? 1 : 0
 
   destroy_duration = "900s" # 10m
 
