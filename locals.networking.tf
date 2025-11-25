@@ -119,9 +119,7 @@ locals {
       enabled          = true
       name             = try(var.vnet_definition.subnets["AppGatewaySubnet"].name, null) != null ? var.vnet_definition.subnets["AppGatewaySubnet"].name : "AppGatewaySubnet"
       address_prefixes = try(var.vnet_definition.subnets["AppGatewaySubnet"].address_prefix, null) != null ? [var.vnet_definition.subnets["AppGatewaySubnet"].address_prefix] : [cidrsubnet(var.vnet_definition.address_space, 4, 5)]
-      route_table = var.flag_platform_landing_zone == true ? {
-        id = module.firewall_route_table[0].resource_id
-      } : null
+      route_table      = null # Application Gateway v2 cannot have UDR with 0.0.0.0/0 to firewall
       network_security_group = {
         id = module.nsgs.resource_id
       }

@@ -3,11 +3,12 @@ locals {
   foundry_ai_foundry = merge(
     var.ai_foundry_definition.ai_foundry, {
       name = local.ai_foundry_name
-      network_injections = [{
-        scenario                   = "agent"
-        subnetArmId                = module.ai_lz_vnet.subnets["AIFoundrySubnet"].resource_id
-        useMicrosoftManagedNetwork = false
-      }]
+      # VNet injection disabled - uncomment below to enable
+      # network_injections = [{
+      #   scenario                   = "agent"
+      #   subnetArmId                = module.ai_lz_vnet.subnets["AIFoundrySubnet"].resource_id
+      #   useMicrosoftManagedNetwork = false
+      # }]
       private_dns_zone_resource_ids = [
         (var.flag_platform_landing_zone ? module.private_dns_zones.ai_foundry_openai_zone.resource_id : local.private_dns_zones_existing.ai_foundry_openai_zone.resource_id),
         (var.flag_platform_landing_zone ? module.private_dns_zones.ai_foundry_ai_services_zone.resource_id : local.private_dns_zones_existing.ai_foundry_ai_services_zone.resource_id),
